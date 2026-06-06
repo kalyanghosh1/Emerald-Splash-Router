@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerald Splash Router | Anime Proxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #00ffd6;
+            --emerald: #08e260;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #06100a 0%, #0d1a12 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .liquid-blob {
+            position: fixed;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(8,226,96,0.1) 0%, rgba(0,255,214,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(60px);
+            animation: move 25s infinite alternate ease-in-out;
+        }
+        @keyframes move {
+            0% { transform: translate(-20%, -20%) scale(1); }
+            50% { transform: translate(50%, 50%) scale(1.2); }
+            100% { transform: translate(120%, 80%) scale(0.8); }
+        }
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        /* 3D Card CSS */
+        .parent-card {
+            width: 100%;
+            height: 320px;
+            perspective: 1000px;
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 768px) {
+            .parent-card {
+                width: 290px;
+                height: 340px;
+            }
+        }
+        .card-3d {
+            height: 100%;
+            width: 100%;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #00ffd6 0%, #08e260 100%);
+            transition: all 0.5s ease-in-out;
+            transform-style: preserve-3d;
+            box-shadow: rgba(5, 71, 17, 0) 40px 50px 25px -40px, rgba(5, 71, 17, 0.2) 0px 25px 25px -5px;
+            position: relative;
+        }
+        .glass-inner {
+            transform-style: preserve-3d;
+            position: absolute;
+            inset: 8px;
+            border-radius: 35px;
+            border-top-right-radius: 100%;
+            background: linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 100%);
+            transform: translate3d(0px, 0px, 25px);
+            border-left: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        .content-3d {
+            padding: 60px 25px 0px 25px;
+            transform: translate3d(0, 0, 26px);
+            pointer-events: none;
+        }
+        .content-3d .title {
+            display: block;
+            color: #06100a;
+            font-weight: 900;
+            font-size: 1.4rem;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+        .content-3d .text {
+            display: block;
+            color: rgba(6, 16, 10, 0.8);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .bottom-3d {
+            padding: 10px 12px;
+            transform-style: preserve-3d;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translate3d(0, 0, 26px);
+            z-index: 10;
+        }
+        .action-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #06100a;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .parent-card:hover .card-3d {
+                transform: rotate3d(1, 1, 0, 10deg);
+            }
+        }
+
+        /* Overlays */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+        .overlay.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(8,226,96,0.3); border-radius: 10px; }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="liquid-blob"></div>
+    
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="overlay">
+        <div class="glass-panel p-8 w-full max-w-md text-center mx-4">
+            <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[#00ffd6] to-[#08e260] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(8,226,96,0.5)]">
+                <svg class="w-12 h-12 text-[#06100a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h1 class="text-3xl font-black mb-2 text-white">EMERALD SPLASH</h1>
+            <p class="text-emerald-400/60 mb-8 text-sm font-bold uppercase tracking-widest">Router Authentication</p>
+            <input type="password" id="pin-input" placeholder="ACCESS PIN" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-xl text-center text-2xl tracking-widest mb-6 focus:border-emerald-500 transition-colors outline-none text-white font-black">
+            <button onclick="login()" class="w-full bg-gradient-to-r from-[#00ffd6] to-[#08e260] text-slate-900 p-4 rounded-xl font-black text-lg hover:shadow-[0_0_20px_rgba(8,226,96,0.6)] transition-all">UNLEASH</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="max-w-7xl mx-auto hidden opacity-0 transition-opacity duration-500" id="dashboard">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12 relative">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-[#00ffd6] to-[#08e260] rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(8,226,96,0.4)]">
+                    <svg class="w-8 h-8 md:w-10 md:h-10 text-[#06100a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-4xl font-black tracking-tighter text-white">EMERALD SPLASH</h1>
+                    <p class="text-emerald-400/50 text-xs md:text-sm font-bold tracking-widest uppercase">Multi-SDK Proxy Router</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="refreshAll()" class="glass-panel px-4 py-2 text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span class="hidden md:inline">SYNC</span>
+                </button>
+                <button onclick="toggleMenu()" class="glass-panel w-10 h-10 flex items-center justify-center text-xl font-black hover:bg-white/10 transition-all">⋮</button>
+                <div id="dropdown-menu" class="absolute right-0 top-14 w-56 glass-panel py-3 hidden flex-col z-50 border-emerald-500/20">
+                    <button onclick="showPasswordModal(); toggleMenu()" class="px-6 py-2 text-left hover:bg-emerald-500/10 text-sm font-bold text-white w-full">CHANGE ACCESS PIN</button>
+                    <button onclick="logout()" class="px-6 py-2 text-left hover:bg-red-500/10 text-sm font-bold text-red-400 w-full border-t border-white/5 mt-2 pt-2">SHUTDOWN SESSION</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+            <div class="glass-panel p-8">
+                <p class="text-emerald-400/40 text-xs font-black uppercase tracking-widest mb-2">Active Endpoints</p>
+                <h3 class="text-5xl font-black text-white" id="stat-active-endpoints">0</h3>
+                <div class="mt-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs text-emerald-400 font-bold">ROUTING SYSTEM ONLINE</span>
+                </div>
+            </div>
+            <div class="glass-panel p-8 lg:col-span-2">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <p class="text-emerald-400/40 text-xs font-black uppercase tracking-widest mb-1">Total Traffic</p>
+                        <h3 class="text-3xl font-black text-white" id="ana-total">0 Requests</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-emerald-400/40 text-xs font-black uppercase tracking-widest mb-1">Today</p>
+                        <p class="text-xl font-black text-emerald-400" id="ana-today">0</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 h-2">
+                    <div class="bg-emerald-500/20 rounded-full overflow-hidden"><div id="bar-today" class="bg-emerald-500 h-full transition-all duration-1000" style="width:0%"></div></div>
+                    <div class="bg-emerald-500/20 rounded-full overflow-hidden"><div id="bar-week" class="bg-emerald-400 h-full transition-all duration-1000" style="width:0%"></div></div>
+                    <div class="bg-emerald-500/20 rounded-full overflow-hidden"><div id="bar-month" class="bg-[#00ffd6] h-full transition-all duration-1000" style="width:0%"></div></div>
+                    <div class="bg-emerald-500/20 rounded-full overflow-hidden"><div id="bar-year" class="bg-white h-full transition-all duration-1000" style="width:0%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            <button onclick="switchTab('endpoints')" id="tab-endpoints" class="px-8 py-3 rounded-2xl bg-emerald-500 text-[#06100a] font-black transition-all shadow-[0_0_20px_rgba(8,226,96,0.3)]">ENDPOINTS</button>
+            <button onclick="switchTab('clients')" id="tab-clients" class="px-8 py-3 rounded-2xl bg-white/5 text-emerald-400 font-bold hover:bg-white/10 transition-all">AGENT KEYS</button>
+            <button onclick="switchTab('logs')" id="tab-logs" class="px-8 py-3 rounded-2xl bg-white/5 text-emerald-400 font-bold hover:bg-white/10 transition-all">CORE CONSOLE</button>
+        </div>
+
+        <!-- Endpoints Section -->
+        <div id="section-endpoints">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-white">ROUTING NODES</h2>
+                <button onclick="showAddModal()" class="bg-emerald-500 text-[#06100a] px-6 py-3 rounded-2xl font-black hover:scale-105 transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                    ADD NODE
+                </button>
+            </div>
+            <div id="endpoints-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                <!-- Cards -->
+            </div>
+        </div>
+
+        <!-- Clients Section -->
+        <div id="section-clients" class="hidden">
+            <div class="glass-panel p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="w-full md:w-auto">
+                    <h2 class="text-2xl font-black text-white">AGENT KEYS</h2>
+                    <p class="text-emerald-400/40 text-sm font-bold">Generate keys for external agents (Hermes, Claude, etc.)</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <input type="text" id="new-client-name" placeholder="AGENT NAME" class="bg-black/40 border border-emerald-500/20 px-6 py-4 rounded-2xl text-white outline-none focus:border-emerald-500 flex-1 md:w-64 font-bold">
+                    <button onclick="addClientKey()" class="bg-emerald-500 text-[#06100a] px-8 py-4 rounded-2xl font-black hover:scale-105 transition-all">GENERATE</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="client-keys-grid"></div>
+        </div>
+
+        <!-- Logs Section -->
+        <div id="section-logs" class="hidden">
+            <div class="glass-panel overflow-hidden border border-emerald-500/20 shadow-[0_0_40px_rgba(8,226,96,0.1)]">
+                <div class="bg-[#06100a] p-4 border-b border-emerald-500/20 flex items-center justify-between">
+                    <div class="flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#08e260]"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-800"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-900"></div>
+                    </div>
+                    <span class="text-[10px] font-black text-emerald-400 tracking-widest uppercase">Emerald Kernel Stream</span>
+                </div>
+                <div class="p-8 bg-black font-mono text-emerald-400 text-sm h-[65vh] overflow-y-auto leading-loose" id="console-output"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Add Endpoint Modal -->
+    <div id="add-modal" class="overlay hide">
+        <div class="glass-panel p-10 w-full max-w-lg mx-4 border-emerald-500/30">
+            <h2 class="text-3xl font-black mb-8 text-white">NEW ROUTE NODE</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">Provider</label>
+                        <input type="text" id="node-provider" placeholder="e.g. NVIDIA" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">Model ID</label>
+                        <input type="text" id="node-model" placeholder="e.g. mixtral-8x7b" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">Base URL (Endpoint)</label>
+                    <input type="text" id="node-url" placeholder="https://api.example.com/v1/chat/completions" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">Secret API Key</label>
+                    <input type="password" id="node-key" placeholder="••••••••••••••••" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">SDK Mode</label>
+                        <select id="node-sdk" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold appearance-none">
+                            <option value="openai">OPENAI SDK</option>
+                            <option value="anthropic">ANTHROPIC SDK</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 block">Priority</label>
+                        <input type="number" id="node-priority" value="0" class="w-full bg-black/50 border border-emerald-500/20 p-4 rounded-2xl text-white outline-none focus:border-emerald-500 font-bold">
+                    </div>
+                </div>
+                
+                <div id="test-result" class="hidden p-4 rounded-2xl text-xs font-bold uppercase tracking-tight"></div>
+
+                <div class="flex gap-4 pt-4">
+                    <button onclick="hideAddModal()" class="flex-1 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all font-black text-sm uppercase">Cancel</button>
+                    <button onclick="testEndpoint()" id="test-btn" class="flex-1 p-4 rounded-2xl border-2 border-emerald-500 text-emerald-400 font-black text-sm uppercase hover:bg-emerald-500 hover:text-[#06100a] transition-all">Test Link</button>
+                    <button onclick="addEndpoint()" id="save-btn" class="hidden flex-1 p-4 rounded-2xl bg-emerald-500 text-[#06100a] font-black text-sm uppercase shadow-[0_0_20px_rgba(8,226,96,0.4)]">Initialize</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Agent Key -->
+    <div id="new-client-key-modal" class="overlay hide">
+        <div class="glass-panel p-10 w-full max-w-md mx-4 border-emerald-500/30 text-center">
+            <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h2 class="text-2xl font-black mb-2 text-white uppercase">Access Granted</h2>
+            <p class="text-emerald-400/50 text-xs font-bold mb-8 uppercase tracking-widest">Copy your secret key now</p>
+            <input type="text" id="display-new-client-key" readonly class="w-full bg-black border border-emerald-500/30 p-5 rounded-2xl font-mono text-center text-lg text-emerald-400 shadow-inner outline-none mb-8">
+            <button onclick="closeNewClientKeyModal()" class="w-full p-5 rounded-2xl bg-white/5 hover:bg-white/10 font-black text-sm uppercase tracking-widest transition-all">I'm Ready</button>
+        </div>
+    </div>
+
+    <!-- Modal for Changing Password -->
+    <div id="password-modal" class="overlay hide">
+        <div class="glass-panel p-10 w-full max-w-md mx-4 border-emerald-500/30">
+            <h2 class="text-2xl font-black mb-6 text-white uppercase tracking-tighter">RESET ACCESS PIN</h2>
+            <input type="password" id="new-password" placeholder="NEW SECRET PIN" class="w-full bg-black/50 border border-emerald-500/20 p-5 rounded-2xl text-white outline-none focus:border-red-500 font-black tracking-widest mb-8">
+            <div class="flex gap-4">
+                <button onclick="hidePasswordModal()" class="flex-1 p-4 rounded-2xl bg-white/5 font-black text-xs">CANCEL</button>
+                <button onclick="changePassword()" class="flex-1 p-4 rounded-2xl bg-red-500 text-white font-black text-xs hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all">UPDATE PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionToken = localStorage.getItem('emerald_session') || '';
+        let logInterval = null;
+
+        function toggleMenu() {
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
+        function switchTab(tabId) {
+            ['endpoints', 'clients', 'logs'].forEach(id => {
+                const btn = document.getElementById(`tab-${id}`);
+                btn.className = 'px-8 py-3 rounded-2xl bg-white/5 text-emerald-400 font-bold hover:bg-white/10 transition-all';
+                document.getElementById(`section-${id}`).classList.add('hidden');
+            });
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            activeTab.className = 'px-8 py-3 rounded-2xl bg-emerald-500 text-[#06100a] font-black transition-all shadow-[0_0_20px_rgba(8,226,96,0.3)]';
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+        }
+
+        window.onload = async () => {
+            if (sessionToken) {
+                try {
+                    const res = await fetch('/admin/live_status', { headers: { 'Authorization': `Bearer ${sessionToken}` }});
+                    if (res.ok) {
+                        document.getElementById('login-overlay').classList.add('hide');
+                        const dashboard = document.getElementById('dashboard');
+                        dashboard.classList.remove('hidden');
+                        setTimeout(() => dashboard.classList.remove('opacity-0'), 50);
+                        refreshAll();
+                        startLogPolling();
+                    } else { logout(); }
+                } catch (e) { logout(); }
+            }
+        };
+
+        async function login() {
+            const pin = document.getElementById('pin-input').value;
+            const res = await fetch('/admin/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                sessionToken = data.token;
+                localStorage.setItem('emerald_session', sessionToken);
+                location.reload();
+            } else { alert('ACCESS DENIED: INVALID PIN'); }
+        }
+
+        function logout() {
+            localStorage.removeItem('emerald_session');
+            location.reload();
+        }
+
+        async function refreshAll() {
+            refreshEndpoints();
+            refreshClientKeys();
+            refreshAnalytics();
+        }
+
+        async function refreshAnalytics() {
+            try {
+                const res = await fetch('/admin/analytics', { headers: { 'Authorization': `Bearer ${sessionToken}` }});
+                const data = await res.json();
+                document.getElementById('ana-today').innerText = data.today;
+                document.getElementById('ana-total').innerText = (data.this_year || 0) + ' Requests';
+                const max = Math.max(data.this_year, 100);
+                document.getElementById('bar-today').style.width = Math.min((data.today / max) * 100 * 365, 100) + '%';
+                document.getElementById('bar-week').style.width = Math.min((data.this_week / max) * 100 * 52, 100) + '%';
+                document.getElementById('bar-month').style.width = Math.min((data.this_month / max) * 100 * 12, 100) + '%';
+                document.getElementById('bar-year').style.width = Math.min((data.this_year / max) * 100, 100) + '%';
+            } catch(e) {}
+        }
+
+        async function refreshEndpoints() {
+            try {
+                const res = await fetch('/admin/endpoints', { headers: { 'Authorization': `Bearer ${sessionToken}` }});
+                const data = await res.json();
+                const grid = document.getElementById('endpoints-grid');
+                grid.innerHTML = '';
+                document.getElementById('stat-active-endpoints').innerText = data.endpoints.length;
+
+                data.endpoints.forEach(ep => {
+                    grid.innerHTML += `
+                        <div class="parent-card">
+                            <div class="card-3d">
+                                <div class="glass-inner"></div>
+                                <div class="content-3d">
+                                    <span class="text-[10px] font-black uppercase opacity-60 text-[#06100a]">${ep.provider_name}</span>
+                                    <span class="title">${ep.model_id}</span>
+                                    <div class="mt-8 space-y-1">
+                                        <span class="text-[10px] font-black text-[#06100a] block opacity-40">ENDPOINT URL</span>
+                                        <span class="text-[11px] font-bold text-[#06100a] block truncate">${ep.endpoint_url}</span>
+                                    </div>
+                                    <div class="mt-4 flex items-center gap-2">
+                                        <span class="px-2 py-1 bg-black/20 rounded text-[9px] font-black text-[#06100a]">${ep.sdk_type.toUpperCase()}</span>
+                                        <span class="px-2 py-1 bg-black/20 rounded text-[9px] font-black text-[#06100a]">P: ${ep.priority}</span>
+                                    </div>
+                                </div>
+                                <div class="bottom-3d">
+                                    <span class="text-[10px] font-black text-[#06100a] opacity-40 uppercase">ACTIVE NODE</span>
+                                    <button onclick="deleteEndpoint(${ep.id})" class="action-btn !bg-black/80 !text-white !border-transparent hover:!bg-black">REMOVE</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {}
+        }
+
+        async function refreshClientKeys() {
+            const res = await fetch('/admin/client-keys', { headers: { 'Authorization': `Bearer ${sessionToken}` }});
+            const data = await res.json();
+            const grid = document.getElementById('client-keys-grid');
+            grid.innerHTML = '';
+            data.keys.forEach(k => {
+                grid.innerHTML += `
+                    <div class="glass-panel p-8 flex justify-between items-center group hover:border-emerald-500/50 transition-all">
+                        <div>
+                            <h3 class="text-xl font-black text-white uppercase">${k.name}</h3>
+                            <p class="font-mono text-xs text-emerald-400 mt-1">${k.key.substring(0, 15)}...</p>
+                        </div>
+                        <button onclick="deleteClientKey('${k.key}')" class="bg-red-500/10 text-red-500 p-3 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function showAddModal() { 
+            document.getElementById('add-modal').classList.remove('hide');
+            document.getElementById('save-btn').classList.add('hidden');
+            document.getElementById('test-btn').classList.remove('hidden');
+            document.getElementById('test-result').classList.add('hidden');
+        }
+        function hideAddModal() { document.getElementById('add-modal').classList.add('hide'); }
+        function showPasswordModal() { document.getElementById('password-modal').classList.remove('hide'); }
+        function hidePasswordModal() { document.getElementById('password-modal').classList.add('hide'); }
+        function closeNewClientKeyModal() { document.getElementById('new-client-key-modal').classList.add('hide'); }
+
+        async function testEndpoint() {
+            const provider = document.getElementById('node-provider').value;
+            const model = document.getElementById('node-model').value;
+            const url = document.getElementById('node-url').value;
+            const key = document.getElementById('node-key').value;
+            const sdk = document.getElementById('node-sdk').value;
+            const priority = document.getElementById('node-priority').value;
+
+            const resDiv = document.getElementById('test-result');
+            resDiv.className = 'p-4 rounded-2xl text-xs font-bold uppercase tracking-tight bg-white/5 text-emerald-400';
+            resDiv.innerText = 'TESTING CONNECTION...';
+            resDiv.classList.remove('hidden');
+
+            const res = await fetch('/admin/test_endpoint', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+                body: JSON.stringify({ provider_name: provider, model_id: model, endpoint_url: url, api_key: key, sdk_type: sdk, priority: parseInt(priority) })
+            });
+            const data = await res.json();
+            if(data.success) {
+                resDiv.className = 'p-4 rounded-2xl text-xs font-bold uppercase tracking-tight bg-emerald-500/20 text-emerald-400';
+                resDiv.innerText = 'SUCCESS: ' + data.message + ' (' + data.sdk_type.toUpperCase() + ' DETECTED)';
+                document.getElementById('node-sdk').value = data.sdk_type;
+                document.getElementById('test-btn').classList.add('hidden');
+                document.getElementById('save-btn').classList.remove('hidden');
+            } else {
+                resDiv.className = 'p-4 rounded-2xl text-xs font-bold uppercase tracking-tight bg-red-500/20 text-red-400';
+                resDiv.innerText = 'ERROR: ' + data.message;
+            }
+        }
+
+        async function addEndpoint() {
+            const provider = document.getElementById('node-provider').value;
+            const model = document.getElementById('node-model').value;
+            const url = document.getElementById('node-url').value;
+            const key = document.getElementById('node-key').value;
+            const sdk = document.getElementById('node-sdk').value;
+            const priority = document.getElementById('node-priority').value;
+
+            await fetch('/admin/endpoints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+                body: JSON.stringify({ provider_name: provider, model_id: model, endpoint_url: url, api_key: key, sdk_type: sdk, priority: parseInt(priority) })
+            });
+            hideAddModal();
+            refreshEndpoints();
+        }
+
+        async function deleteEndpoint(id) {
+            if(!confirm('REMOVE NODE?')) return;
+            await fetch(`/admin/endpoints/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${sessionToken}` }});
+            refreshEndpoints();
+        }
+
+        async function addClientKey() {
+            const name = document.getElementById('new-client-name').value;
+            if(!name) return;
+            const res = await fetch('/admin/client-keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            document.getElementById('display-new-client-key').value = data.key;
+            document.getElementById('new-client-key-modal').classList.remove('hide');
+            document.getElementById('new-client-name').value = '';
+            refreshClientKeys();
+        }
+
+        async function deleteClientKey(key) {
+            if(!confirm('REVOKE AGENT ACCESS?')) return;
+            await fetch(`/admin/client-keys/${key}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${sessionToken}` }});
+            refreshClientKeys();
+        }
+
+        async function changePassword() {
+            const new_password = document.getElementById('new-password').value;
+            if(!new_password) return;
+            await fetch('/admin/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionToken}` },
+                body: JSON.stringify({ new_password })
+            });
+            alert('PIN UPDATED');
+            hidePasswordModal();
+        }
+
+        function startLogPolling() {
+            setInterval(async () => {
+                const res = await fetch('/admin/live_status', { headers: { 'Authorization': `Bearer ${sessionToken}` }});
+                const data = await res.json();
+                const out = document.getElementById('console-output');
+                out.innerHTML = data.logs.join('<br>') + '<br><span class="animate-pulse">_</span>';
+                out.scrollTop = out.scrollHeight;
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
